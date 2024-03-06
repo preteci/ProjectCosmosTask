@@ -4,7 +4,7 @@
 
 To run this project clone this repository and populate **appsettings.json** with Azure Cosmos DB key.
 
-### List of endpoints
+### Documentation for endpoints
 
 | Endpoint  | REST Method | Description |
 | --- | --- | --- |
