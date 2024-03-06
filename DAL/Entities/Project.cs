@@ -1,6 +1,6 @@
-﻿using DataTask = WebApi.Entities.Task;
+﻿using DataTask = DAL.Entities.Task;
 
-namespace WebApi.Entities
+namespace DAL.Entities
 {
     public class Project
     {

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebApi.Data;
+using DAL.Data;
 
 namespace WebApi.Extensions
 {

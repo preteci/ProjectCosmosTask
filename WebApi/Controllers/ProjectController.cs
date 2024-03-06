@@ -1,51 +1,75 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BLL.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Data;
-using WebApi.Entities;
-using DataTask = WebApi.Entities.Task;
+using DAL.Entities;
+using DataTask = DAL.Entities.Task;
+using BLL.Execptions;
 
 namespace WebApi.Controllers
 {
     [ApiController]
-    [Route("apii/[controller]")]
+    [Route("api/[controller]")]
 
     public class ProjectController : ControllerBase
     {
-        private readonly CosmosContext _context;
+        private readonly IProjectService _projectService;
 
-        public ProjectController(CosmosContext context)
+        public ProjectController(IProjectService projectService)
         {
-            _context = context;
+            _projectService = projectService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Project>> GetAllProject()
+        public async Task<IActionResult> GetAllProject()
         {
-            return await _context.Projects.Include(t => t.Tasks).ToListAsync();
-
+            var projects = await _projectService.GetAllProjectAsync();
+            return Ok(projects);
         }
 
         [HttpGet("{Id}")]
-        public async Task<Project> GetProject(string Id)
+        public async Task<IActionResult> GetProject(string Id)
         {
-            return await _context.Projects.FirstOrDefaultAsync(t => t.id == Id);
-
+            try
+            {
+                var project = await _projectService.GetProjectByIdAsync(Id);
+                return Ok(project);
+            }
+            catch (ProjectNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("{Id}/tasks")]
-        public async Task<IEnumerable<DataTask>> GetAllTasksFromProject(string Id)
+        public async Task<IActionResult> GetAllTasksFromProject(string Id)
         {
-            var project = await _context.Projects.Include(t => t.Tasks).FirstOrDefaultAsync(t => t.id == Id);
-            var tasks = project.Tasks.ToList();
-            return tasks;
-        }
+            try
+            {
+                var tasks = await _projectService.GetTasksFromProjectAsync(Id);
+                return Ok(tasks);
+            }
+            catch (ProjectNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+         }
 
         [HttpGet("{projectId}/tasks/{taskId}")]
-        public async Task<DataTask> GetTaskFromProject(string projectId, string taskId)
+        public async Task<IActionResult> GetTaskFromProject(string projectId, string taskId)
         {
-            var project = await _context.Projects.Include(t => t.Tasks).FirstOrDefaultAsync(t => t.id == projectId);
-            var task = project.Tasks.Find(t => t.id == taskId);
-            return task;
+            try
+            {
+                var task = await _projectService.GetTaskByIdFromProject(projectId, taskId);
+                return Ok(task);
+            }
+            catch(ProjectNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(TaskNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
     }

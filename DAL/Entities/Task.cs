@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace WebApi.Entities
+namespace DAL.Entities
 {
     [Owned]
     public class Task
