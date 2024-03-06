@@ -1,4 +1,4 @@
-## PojectCosmosTask
+## ProjectCosmosTask
 
 **ProjectCosmosTask** is an .NET REST Api witten in C# Layered Arhitecture using Azure Cosmos DB for database.
 
