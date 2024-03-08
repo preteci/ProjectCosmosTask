@@ -3,6 +3,7 @@ using DAL.Entities;
 using DataTask = DAL.Entities.Task;
 using BLL.Execptions;
 using System.Threading.Tasks;
+using WebApi.Controllers;
 
 namespace BLL.Services
 {
@@ -14,9 +15,20 @@ namespace BLL.Services
             _projectRepository = projectRepository;
         }
 
-        public async Task<IEnumerable<Project>> GetAllProjectAsync()
+        public async Task<IEnumerable<Project>> GetAllProjectAsync(QueryParameters parameters)
         {
-            return await _projectRepository.GetAllAsync();
+
+            var projects = await _projectRepository.GetAllAsync();
+
+            if(!string.IsNullOrEmpty(parameters.Name))
+            {
+                projects = projects.Where(p => p.Name.ToLowerInvariant().Contains(parameters.Name.ToLowerInvariant()));
+            }
+
+            var pagedProjects = projects
+                           .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                           .Take(parameters.PageSize);
+            return pagedProjects;
         }
 
         public async Task<Project> GetProjectByIdAsync(string id)
@@ -29,15 +41,27 @@ namespace BLL.Services
             return project;
         }
 
-        public async Task<IEnumerable<DataTask>> GetTasksFromProjectAsync(string id)
+        public async Task<IEnumerable<DataTask>> GetTasksFromProjectAsync(string id, QueryParameters parameters)
         {
             var project = await _projectRepository.GetByIdAsync(id);
+
             if(project == null)
             {
                 throw new ProjectNotFoundException($"Project with ID: {id} has not been found");
             }
-            var tasks = project.Tasks.ToList();
-            return tasks;
+
+            var tasks = project.Tasks.AsQueryable();
+
+            if (!string.IsNullOrEmpty(parameters.Name))
+            {
+                tasks = tasks.Where(p => p.Name.ToLowerInvariant().Contains(parameters.Name.ToLowerInvariant()));
+            }
+
+            var taskPages = tasks
+                           .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                           .Take(parameters.PageSize);
+            return taskPages;
+            return taskPages;
         }
 
         public async Task<DataTask> GetTaskByIdFromProject(string projectId, string taskId)

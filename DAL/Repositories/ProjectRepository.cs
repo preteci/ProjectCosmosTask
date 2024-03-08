@@ -16,7 +16,8 @@ namespace DAL.Repositories
 
         public async Task<IEnumerable<Project>> GetAllAsync()
         {
-            return await _context.Projects.Include(t => t.Tasks).ToListAsync();
+           var projects = await _context.Projects.Include(t => t.Tasks).ToListAsync();
+           return projects.AsQueryable();
         }
         public async Task<Project> GetByIdAsync(string id)
         {

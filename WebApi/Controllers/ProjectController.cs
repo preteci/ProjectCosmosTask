@@ -4,9 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using DAL.Entities;
 using DataTask = DAL.Entities.Task;
 using BLL.Execptions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Identity.Web.Resource;
 
 namespace WebApi.Controllers
 {
+    
     [ApiController]
     [Route("api/projects")]
 
@@ -20,12 +23,13 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProject()
+        public async Task<IActionResult> GetAllProject([FromQuery] QueryParameters parameters)
         {
-            var projects = await _projectService.GetAllProjectAsync();
+            var projects = await _projectService.GetAllProjectAsync(parameters);
             return Ok(projects);
         }
 
+        [Authorize]
         [HttpGet("{Id}")]
         public async Task<IActionResult> GetProject(string Id)
         {
@@ -40,12 +44,13 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("{Id}/tasks")]
-        public async Task<IActionResult> GetAllTasksFromProject(string Id)
+        public async Task<IActionResult> GetAllTasksFromProject(string Id, [FromQuery] QueryParameters parameters)
         {
             try
             {
-                var tasks = await _projectService.GetTasksFromProjectAsync(Id);
+                var tasks = await _projectService.GetTasksFromProjectAsync(Id, parameters);
                 return Ok(tasks);
             }
             catch (ProjectNotFoundException ex)
@@ -54,6 +59,7 @@ namespace WebApi.Controllers
             }
          }
 
+        [Authorize]
         [HttpGet("{projectId}/tasks/{taskId}")]
         public async Task<IActionResult> GetTaskFromProject(string projectId, string taskId)
         {
