@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using DAL.Data;
+using Azure.Identity;
 
 namespace WebApi.Extensions
 {
@@ -9,12 +10,23 @@ namespace WebApi.Extensions
         {
             services.AddDbContext<CosmosContext>(opt =>
             {
-                opt.UseCosmos(config.GetConnectionString("CosmosUrl"), config.GetConnectionString("CosmosKey"), config.GetConnectionString("CosmosDatabaseName"));
+                opt.UseCosmos(config["CosmosDB:Url"], config["CosmosDB:Key"], config["CosmosDB:DatabaseName"]);
+                
             });
 
             services.AddCors();
 
             return services;
         }
+
+        public static IConfigurationManager AddAzureKeyVaultAsConfig(this IConfigurationManager manager, IConfiguration config)
+        {
+            var keyVaultName = config.GetValue<string>("KeyVaultName");
+            var keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net");
+            manager.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
+            return manager;
+        }
+
+
     }
 }

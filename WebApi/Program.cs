@@ -29,10 +29,13 @@ builder.Services.AddAuthorization(config =>
         policyBuilder.Requirements.Add(new ScopeAuthorizationRequirement() { RequiredScopesConfigurationKey = $"AzureAd:Scopes" }));
 });
 
-var app = builder.Build();
+if(builder.Environment.IsProduction())
+{
+    builder.Configuration.AddAzureKeyVaultAsConfig(builder.Configuration);
+}
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+var app = builder.Build();
+if (!app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
